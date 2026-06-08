@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-size="medium">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NextTick</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237c3aed'/><g transform='translate(14,14) scale(3.0)' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 11.08V12a10 10 0 1 1-5.93-9.14'/><polyline points='22 4 12 14.01 9 11.01'/></g></svg>"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ── Custom cursor (desktop only) ───────────── -->
+<div class="cur-ring" id="curRing"></div>
+<div class="cur-dot"  id="curDot"></div>
+
+<!-- ── Animated background canvas ────────────── -->
+<canvas id="bgCanvas"></canvas>
+
+<div class="app">
+
+  <!-- ════════════ HEADER ════════════ -->
+  <header class="header">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      NextTick
+    </div>
+    <div class="header-center" id="headerClock"></div>
+    <div class="header-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ════════════ BODY ════════════ -->
+  <div class="app-body">
+
+    <!-- ── Sidebar (desktop) ──────────────────── -->
+    <aside class="sidebar">
+
+      <nav class="sidenav" role="navigation" aria-label="Main navigation">
+        <button class="sidenav-btn active" data-tab="tasks">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/>
+            <circle cx="4" cy="6"  r="1.2" fill="currentColor" stroke="none"/>
+            <circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/>
+            <circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>Tasks</span>
+          <span class="side-badge" id="sideTaskBadge"></span>
+        </button>
+        <button class="sidenav-btn" data-tab="calendar">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>Calendar</span>
+        </button>
+        <button class="sidenav-btn" data-tab="notes">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          <span>Notes</span>
+        </button>
+        <button class="sidenav-btn" data-tab="pomodoro">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>Focus</span>
+        </button>
+        <button class="sidenav-btn" data-tab="settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2m0 16v2M2 12h2m16 0h2"/>
+          </svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Today stats widget -->
+      <div class="sidebar-widget">
+        <div class="widget-label">Today's overview</div>
+        <div class="today-stats">
+          <div class="today-stat">
+            <span class="ts-val" id="sw-active">0</span>
+            <span class="ts-lbl">Active</span>
+          </div>
+          <div class="today-stat">
+            <span class="ts-val" id="sw-done">0</span>
+            <span class="ts-lbl">Done</span>
+          </div>
+          <div class="today-stat overdue-stat">
+            <span class="ts-val" id="sw-overdue">0</span>
+            <span class="ts-lbl">Overdue</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini calendar -->
+      <div class="sidebar-widget">
+        <div class="mcal-nav">
+          <button class="mcal-arrow" id="mcalPrev">‹</button>
+          <span class="mcal-title" id="mcalTitle"></span>
+          <button class="mcal-arrow" id="mcalNext">›</button>
+        </div>
+        <div class="mcal-grid" id="mcalGrid"></div>
+      </div>
+
+      <!-- Upcoming tasks -->
+      <div class="sidebar-widget upcoming-widget">
+        <div class="widget-label">Upcoming</div>
+        <ul class="upcoming-list" id="upcomingList"></ul>
+        <div class="upcoming-empty" id="upcomingEmpty" hidden>
+          <span>No upcoming tasks</span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── Main content ───────────────────────── -->
+    <main class="content">
+
+      <!-- ═════ TASKS PANEL ═════ -->
+      <section class="panel active" id="panel-tasks">
+        <div class="panel-card">
+
+          <div class="task-controls">
+            <div class="search-wrap">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="search" id="taskSearch" class="search-input" placeholder="Search tasks…" autocomplete="off"/>
+            </div>
+            <div class="sort-wrap">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".5">
+                <line x1="4" y1="6" x2="20" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/>
+              </svg>
+              <select id="taskSort" class="sort-select">
+                <option value="default">Default</option>
+                <option value="priority">Priority</option>
+                <option value="dueDate">Due Date</option>
+                <option value="name">Name A–Z</option>
+              </select>
+            </div>
+          </div>
+
+          <form class="task-form" id="todoForm">
+            <div class="task-input-row">
+              <button type="button" class="priority-btn" id="priorityBtn" data-priority="medium">
+                <span class="priority-dot"></span>
+                <span class="priority-label">Med</span>
+              </button>
+              <input type="text" id="todoInput" class="input" placeholder="Add task… use #tag" maxlength="200" autocomplete="off"/>
+              <button type="button" class="icon-btn" id="dateBtnToggle" title="Set due date">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </button>
+              <button type="submit" class="add-btn">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+            </div>
+            <div class="task-meta-row" id="taskMetaRow" hidden>
+              <div class="date-pick-wrap">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <input type="date" id="dateInput" class="date-input"/>
+                <button type="button" class="clear-meta-btn" id="clearDateBtn" hidden>×</button>
+              </div>
+              <div class="tag-preview" id="tagPreview"></div>
+            </div>
+          </form>
+
+          <div class="filters" role="tablist">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Done</button>
+            <button class="filter-btn" data-filter="today">Today</button>
+            <button class="filter-btn" data-filter="overdue">Overdue</button>
+          </div>
+
+          <ul class="task-list" id="taskList"></ul>
+
+          <div class="empty-state" id="emptyState">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l2 2 4-4"/>
+            </svg>
+            <p id="emptyMsg">Nothing here yet.<br>Add your first task!</p>
+          </div>
+
+          <div class="footer-bar" id="footerBar" hidden>
+            <div class="task-stats-row">
+              <span id="taskCount">0 left</span>
+              <span class="stat-sep">·</span>
+              <span id="completedCount">0 done</span>
+            </div>
+            <button class="clear-btn" id="clearBtn">Clear done</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ═════ CALENDAR PANEL ═════ -->
+      <section class="panel" id="panel-calendar" hidden>
+        <div class="panel-card cal-panel-card">
+
+          <div class="cal-top">
+            <div class="cal-nav-row">
+              <button class="cal-nav-btn" id="calPrev">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <h2 class="cal-title" id="calTitle">June 2026</h2>
+              <button class="cal-nav-btn" id="calNext">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <button class="cal-today-btn" id="calToday">Today</button>
+            </div>
+            <div class="cal-day-headers">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+          </div>
+
+          <div class="cal-grid" id="calGrid"></div>
+
+        </div>
+      </section>
+
+      <!-- ═════ NOTES PANEL ═════ -->
+      <section class="panel" id="panel-notes" hidden>
+        <div class="notes-layout">
+
+          <aside class="notes-sidebar" id="notesSidebar">
+            <div class="sidebar-header">
+              <span class="sidebar-title">Notes</span>
+              <button class="new-note-btn" id="newNoteBtn" title="New note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+            </div>
+            <div class="sidebar-search-wrap">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="search" id="noteSearch" class="sidebar-search" placeholder="Search notes…"/>
+            </div>
+            <ul class="notes-list" id="notesList"></ul>
+            <div class="sidebar-empty" id="notesSidebarEmpty" hidden>
+              <p>No notes yet</p>
+              <button class="sidebar-create-btn" id="createFirstNoteBtn">Create note</button>
+            </div>
+          </aside>
+
+          <div class="notes-main" id="notesMain" hidden>
+            <div class="note-header">
+              <button class="back-btn" id="backBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                Notes
+              </button>
+              <input type="text" id="noteTitleInput" class="note-title-input" placeholder="Untitled" maxlength="80"/>
+              <span class="note-ts" id="noteTimestamp"></span>
+              <button class="icon-btn danger-hover" id="deleteNoteBtn" title="Delete note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="notes-toolbar">
+              <div class="toolbar-group">
+                <button class="tool-btn" data-cmd="bold" title="Bold (Ctrl+B)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
+                  </svg>
+                </button>
+                <button class="tool-btn" data-cmd="italic" title="Italic (Ctrl+I)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/>
+                  </svg>
+                </button>
+                <button class="tool-btn" data-cmd="underline" title="Underline (Ctrl+U)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/>
+                  </svg>
+                </button>
+                <button class="tool-btn" data-cmd="strikeThrough" title="Strikethrough">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="12" x2="20" y2="12"/>
+                    <path d="M17.5 7C17.5 5.07 15 3.5 12 3.5S6.5 5.07 6.5 7c0 1.4.9 2.6 2.5 3.5"/>
+                    <path d="M7 17c0 1.93 2.5 3.5 5 3.5s5-1.57 5-3.5c0-1.4-.9-2.6-2.5-3.5"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="toolbar-divider"></div>
+              <div class="toolbar-group">
+                <button class="tool-btn lbl" data-cmd="formatBlock" data-val="h1" title="Heading 1">H1</button>
+                <button class="tool-btn lbl" data-cmd="formatBlock" data-val="h2" title="Heading 2">H2</button>
+                <button class="tool-btn lbl" data-cmd="formatBlock" data-val="h3" title="Heading 3">H3</button>
+                <button class="tool-btn lbl" data-cmd="formatBlock" data-val="p" title="Paragraph">¶</button>
+              </div>
+              <div class="toolbar-divider"></div>
+              <div class="toolbar-group">
+                <button class="tool-btn" data-cmd="insertUnorderedList" title="Bullet list">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/>
+                    <circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/>
+                    <circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+                    <circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/>
+                  </svg>
+                </button>
+                <button class="tool-btn" data-cmd="insertOrderedList" title="Numbered list">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/>
+                    <path d="M4 6h1v4M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="toolbar-divider"></div>
+              <div class="toolbar-group">
+                <button class="tool-btn highlight-btn" id="highlightBtn" title="Highlight">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
+                  </svg>
+                  <span class="hl-pip"></span>
+                </button>
+              </div>
+              <div class="toolbar-spacer"></div>
+              <div class="toolbar-group">
+                <button class="tool-btn action-btn" id="exportNoteBtn" title="Export as .txt">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Export
+                </button>
+                <button class="tool-btn action-btn" id="importTxtBtn" title="Import .txt file">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  Import
+                </button>
+                <input type="file" id="importTxtInput" accept=".txt" hidden/>
+              </div>
+            </div>
+
+            <div class="notepad-editor" id="notepadEditor" contenteditable="true" spellcheck="true"
+              role="textbox" aria-multiline="true" data-placeholder="Start writing…"></div>
+
+            <div class="notes-footer">
+              <span class="save-indicator" id="saveIndicator">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Saved
+              </span>
+              <span id="wordCount">0 words</span>
+            </div>
+          </div>
+
+          <div class="notes-no-sel" id="notesNoSel">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".3">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <p>Select a note or create one</p>
+            <button class="new-note-btn-lg" id="createFirstNoteBtn2">New note</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ═════ POMODORO PANEL ═════ -->
+      <section class="panel" id="panel-pomodoro" hidden>
+        <div class="panel-card pom-card">
+          <div class="pom-modes">
+            <button class="pom-mode-btn active" data-mode="work">Focus</button>
+            <button class="pom-mode-btn" data-mode="short">Short Break</button>
+            <button class="pom-mode-btn" data-mode="long">Long Break</button>
+          </div>
+          <div class="timer-wrap">
+            <svg class="timer-ring" viewBox="0 0 200 200">
+              <circle class="ring-bg" cx="100" cy="100" r="85"/>
+              <circle class="ring-fg" cx="100" cy="100" r="85" id="timerArc"/>
+            </svg>
+            <div class="timer-center">
+              <div class="timer-display" id="timerDisplay">25:00</div>
+              <div class="timer-label" id="timerLabel">Ready</div>
+            </div>
+          </div>
+          <div class="session-dots" id="sessionDots"></div>
+          <div class="pom-controls">
+            <button class="pom-btn ghost" id="pomReset" title="Reset">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/>
+              </svg>
+            </button>
+            <button class="pom-btn primary" id="pomStartPause">
+              <svg class="icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg class="icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>
+              <span class="pom-btn-label">Start</span>
+            </button>
+            <button class="pom-btn ghost" id="pomSkip" title="Skip">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/><line x1="19" y1="5" x2="19" y2="19"/>
+              </svg>
+            </button>
+          </div>
+          <div class="pom-stats">
+            <div class="pom-stat-item"><span class="pom-stat-val" id="pomSessionCount">0</span><span class="pom-stat-lbl">Sessions</span></div>
+            <div class="pom-stat-divider"></div>
+            <div class="pom-stat-item"><span class="pom-stat-val" id="pomFocusTime">0m</span><span class="pom-stat-lbl">Focus time</span></div>
+            <div class="pom-stat-divider"></div>
+            <div class="pom-stat-item"><span class="pom-stat-val" id="pomBreakTime">0m</span><span class="pom-stat-lbl">Break time</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════ SETTINGS PANEL ═════ -->
+      <section class="panel" id="panel-settings" hidden>
+        <div class="settings-wrap">
+
+          <div class="settings-section">
+            <h3 class="settings-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              Appearance
+            </h3>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Theme</span></div>
+              <div class="btn-group" id="themeGroup">
+                <button class="btn-opt" data-val="dark">Dark</button>
+                <button class="btn-opt" data-val="light">Light</button>
+                <button class="btn-opt" data-val="system">System</button>
+              </div>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Accent Color</span></div>
+              <div class="color-swatches" id="colorSwatches"></div>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Font Size</span></div>
+              <div class="btn-group" id="fontSizeGroup">
+                <button class="btn-opt" data-val="small">Small</button>
+                <button class="btn-opt" data-val="medium">Medium</button>
+                <button class="btn-opt" data-val="large">Large</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="settings-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Tasks
+            </h3>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Default Priority</span></div>
+              <div class="btn-group" id="defaultPriorityGroup">
+                <button class="btn-opt" data-val="low">Low</button>
+                <button class="btn-opt" data-val="medium">Medium</button>
+                <button class="btn-opt" data-val="high">High</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="settings-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Focus Timer
+            </h3>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Work Duration</span><span class="setting-desc">Minutes per session</span></div>
+              <div class="btn-group" id="pomWorkGroup">
+                <button class="btn-opt" data-val="15">15</button><button class="btn-opt" data-val="25">25</button>
+                <button class="btn-opt" data-val="30">30</button><button class="btn-opt" data-val="45">45</button>
+              </div>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Short Break</span></div>
+              <div class="btn-group" id="pomShortGroup">
+                <button class="btn-opt" data-val="5">5</button><button class="btn-opt" data-val="10">10</button><button class="btn-opt" data-val="15">15</button>
+              </div>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Long Break</span><span class="setting-desc">After 4 sessions</span></div>
+              <div class="btn-group" id="pomLongGroup">
+                <button class="btn-opt" data-val="10">10</button><button class="btn-opt" data-val="15">15</button>
+                <button class="btn-opt" data-val="20">20</button><button class="btn-opt" data-val="30">30</button>
+              </div>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Sound</span><span class="setting-desc">Beep when timer ends</span></div>
+              <label class="toggle"><input type="checkbox" id="soundToggle" checked/><span class="toggle-track"></span></label>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Auto-start Breaks</span></div>
+              <label class="toggle"><input type="checkbox" id="autoStartToggle"/><span class="toggle-track"></span></label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="settings-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+              Data
+            </h3>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Export Backup</span><span class="setting-desc">Download all data as JSON</span></div>
+              <button class="setting-action-btn" id="exportDataBtn">Export</button>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Import Backup</span><span class="setting-desc">Restore from JSON file</span></div>
+              <button class="setting-action-btn" id="importDataBtn">Import</button>
+              <input type="file" id="importFileInput" accept=".json" hidden/>
+            </div>
+            <div class="setting-row"><div class="setting-info"><span class="setting-label">Clear All Data</span><span class="setting-desc danger-text">Delete everything permanently</span></div>
+              <button class="setting-action-btn danger" id="clearAllBtn">Clear All</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="settings-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>
+              Keyboard Shortcuts
+            </h3>
+            <div class="shortcuts-grid">
+              <kbd>/</kbd><span>Focus task input</span>
+              <kbd>Ctrl+1</kbd><span>Tasks</span>
+              <kbd>Ctrl+2</kbd><span>Calendar</span>
+              <kbd>Ctrl+3</kbd><span>Notes</span>
+              <kbd>Ctrl+4</kbd><span>Focus timer</span>
+              <kbd>Space</kbd><span>Start/pause timer (on Focus tab)</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="about-row">
+              <div class="logo" style="font-size:.9rem;color:var(--accent)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                NextTick
+              </div>
+              <span class="version-badge">v3.0</span>
+            </div>
+            <p class="about-desc">Local-first productivity. Tasks, calendar, notes, and focus — no account needed.</p>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /.app-body -->
+
+  <!-- ── Mobile bottom nav ──────────────────────── -->
+  <nav class="mobile-nav" role="navigation" aria-label="Main navigation">
+    <button class="mnav-btn active" data-tab="tasks">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/>
+        <circle cx="4" cy="6"  r="1.2" fill="currentColor" stroke="none"/>
+        <circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/>
+        <circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>Tasks</span>
+    </button>
+    <button class="mnav-btn" data-tab="calendar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span>Cal</span>
+    </button>
+    <button class="mnav-btn" data-tab="notes">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      <span>Notes</span>
+    </button>
+    <button class="mnav-btn" data-tab="pomodoro">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>Focus</span>
+    </button>
+    <button class="mnav-btn" data-tab="settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2m0 16v2M2 12h2m16 0h2"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+</div><!-- /.app -->
+<script src="app.js"></script>
+</body>
+</html>
